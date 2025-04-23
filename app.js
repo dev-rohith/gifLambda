@@ -1,49 +1,47 @@
-import https from 'https';
-
 export const handler = async (event) => {
-  const { prompt } = event.pathParameters || {};
-  const apiKey = process.env.TENOR_API_KEY || 'LIVDSRZULELA';
-  
-  const url = `https://g.tenor.com/v1/search?q=${prompt}&key=${apiKey}&limit=1`;
-
+  const { prompt } = event.pathParameters || {}; //event object that is getting from the apigateway
+  const apiKey = process.env.TENOR_API_KEY; //i know that why i included api key so that you can test it without generating another
+  if (prompt?.length === 0) { 
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        message: "empty search",
+      }),
+      headers: { "Content-Type": "application/json" },
+    };
+  }
   try {
-    const resData = await new Promise((resolve, reject) => {
-      https.get(url, (res) => {
-        let body = '';
-        res.on('data', (chunk) => body += chunk);
-        res.on('end', () => {
-          try {
-            resolve(JSON.parse(body));
-          } catch (err) {
-            reject(err);
-          }
-        });
-      }).on('error', reject);
-    });
+    const apiRes = await fetch(
+      `https://g.tenor.com/v1/search?q=${prompt}&key=${apiKey}&limit=1`
+    );
+    const resData = await apiRes.json();
 
-    if (!resData?.results || resData.results.length === 0) {
+    if (!resData?.results || resData.results?.length === 0) {
       return {
         statusCode: 404,
-        body: JSON.stringify({ message: "No gifs found with that search term" }),
-        headers: { "Content-Type": "application/json" }
+        body: JSON.stringify({
+          message: "No gif's found with that search term",
+        }),
+        headers: { "Content-Type": "application/json" },
       };
     }
 
     const gifUrl = resData.results[0].url;
 
     return {
-      statusCode: 301,
+      statusCode: 302, //302 http statusCode is for the moved temporary if we use the 301 then we can't come back previous url that is permanently moving(it will remove history from browser history Api)
       headers: {
-        Location: gifUrl
+        Location: gifUrl,
       },
-      body: ""
+      body: "",
     };
-
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: "Internal Server Error", error: error.message }),
-      headers: { "Content-Type": "application/json" }
+      body: JSON.stringify({
+        message: error?.message,
+      }),
+      headers: { "Content-Type": "application/json" },
     };
   }
 };
