@@ -1,6 +1,6 @@
 export const handler = async (event) => {
   const { prompt } = event.pathParameters || {}; //event object that is getting from the apigateway
-  const apiKey = process.env.TENOR_API_KEY; //i know that why i included api key so that you can test it without generating another
+  const apiKey = process.env.TENOR_API_KEY;
   if (prompt?.length === 0) { 
     return {
       statusCode: 400,
@@ -29,7 +29,7 @@ export const handler = async (event) => {
     const gifUrl = resData.results[0].url;
 
     return {
-      statusCode: 302, //302 http statusCode is for the moved temporary if we use the 301 then we can't come back previous url that is permanently moving(it will remove history from browser history Api)
+      statusCode: 307, //307 http statusCode is for the  temporary redirect if we use the 301 then we can't come back previous url that is permanently moving(it will remove history from browser history Api)
       headers: {
         Location: gifUrl,
       },
