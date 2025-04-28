@@ -1,5 +1,5 @@
 export const handler = async (event) => {
-  const { prompt } = event.pathParameters || {}; //event object that is getting from the apigateway
+  const { prompt } = event.pathParameters || {}; //event object that is getting from the apigateway(http)
   const apiKey = process.env.TENOR_API_KEY;
   if (prompt?.length === 0) { 
     return {
